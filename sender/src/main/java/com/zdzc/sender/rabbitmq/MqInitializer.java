@@ -185,7 +185,11 @@ public class MqInitializer {
             try {
                 Channel channel = connection.createChannel();
                 for(int j = 1;j <= queueCount;j++){
-                    channel.queueDeclare(queuePrex + j,true,false,false,null);
+                    String qname = queuePrex +j;
+                    if(DataType.BUSINESS.getValue() == type){
+                        qname = queuePrex + (businessQueueStart-1 + j);
+                    }
+                    channel.queueDeclare(qname,true,false,false,null);
                 }
                 if(DataType.GPS.getValue() == type){
                     gpsChannels.add(channel);
