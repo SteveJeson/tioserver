@@ -2,16 +2,19 @@ package com.zdzc.sender.server;
 
 import ch.qos.logback.core.encoder.ByteArrayUtil;
 import com.rabbitmq.client.Channel;
+import com.zdzc.sender.Enum.DataType;
+import com.zdzc.sender.Enum.ProtocolSign;
 import com.zdzc.sender.packet.Header;
 import com.zdzc.sender.packet.Message;
 import com.zdzc.sender.rabbitmq.MqInitializer;
 import com.zdzc.sender.rabbitmq.MqSender;
 import com.zdzc.sender.util.*;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tio.core.ChannelContext;
 import org.tio.core.GroupContext;
-import org.tio.core.Tio;
 import org.tio.core.exception.AioDecodeException;
 import org.tio.core.intf.Packet;
 import org.tio.server.intf.ServerAioHandler;
@@ -44,18 +47,35 @@ public class SenderServerAioHandler implements ServerAioHandler {
         Message msg = null;
         byte[] dst = new byte[readableLength];
         byteBuffer.get(dst);
-        String hexstr = CommonUtil.toHexString(dst);
-        logger.debug("source data -> " + hexstr);
+        List<String> markList = Arrays.asList(ProtocolSign.JT808_BEGINMARK.getValue(), ProtocolSign.WRT_BEGINMARK.getValue());
         String beginMark = CommonUtil.toHexString(CommonUtil.subByteArr(dst,0,1));
-        List<String> markList = Arrays.asList(ProtocolSign.JT808.getValue(), ProtocolSign.WRT.getValue());
-        if(!markList.contains(beginMark.toUpperCase())){
-            logger.warn("未知协议内容 -> " + hexstr);
-        }else{
-            if(markList.get(0).equals(beginMark.toUpperCase())){
-                msg = toJt808Decoder(dst);
-            }else if(markList.get(1).equals(beginMark.toUpperCase())){
-                System.out.println("沃瑞特协议");
+        String wrtBeginMark;
+        try {
+            wrtBeginMark = new String(CommonUtil.subByteArr(dst, 0, 3), "UTF-8");
+            if(!markList.contains(beginMark.toUpperCase()) && !markList.contains(wrtBeginMark.toUpperCase())){
+                String hexStr = CommonUtil.toHexString(dst);
+                String str = new String(dst, "UTF-8");
+                logger.warn("未知协议内容: 十六进制字符串形式 -> {}, 普通字符串形式 -> {}", hexStr, str);
+                return null;
             }
+        } catch (UnsupportedEncodingException e) {
+            logger.error(e.getStackTrace().toString());
+            return null;
+        }
+
+        if(markList.get(0).equals(beginMark.toUpperCase())){
+            String hexStr = CommonUtil.toHexString(dst);
+            logger.debug("source data -> {}", hexStr);
+            msg = toJt808Decoder(dst);
+        }else if(markList.get(1).equals(wrtBeginMark.toUpperCase())){
+            try {
+                String str = new String(dst, "UTF-8");
+                logger.debug("source data -> {}", str);
+                msg = toWrtDecoder(str);
+            } catch (UnsupportedEncodingException e) {
+                logger.error(e.getStackTrace().toString());
+            }
+
         }
         return msg;
     }
@@ -68,8 +88,17 @@ public class SenderServerAioHandler implements ServerAioHandler {
     @Override
     public void handler(Packet packet, ChannelContext channelContext) throws Exception {
         Message msg = (Message)packet;
+        if(msg.getStick()){
+            logger.info("handle stick message -> {}", msg.getAll());
+            List<String> list = dealPackageSplicing(msg.getAll());
+            for (String data : list){
+                msg = decodeMessage(data);
+                logger.info("msg -> {}", msg.getAll());
+            }
+        }
+
         //给客户端发送应答消息
-        if(msg.getReplyBody() != null){
+        /*if(msg.getReplyBody() != null){
             Message responseBody = new Message();
             responseBody.setBody(msg.getReplyBody());
             Tio.send(channelContext, responseBody);
@@ -85,38 +114,76 @@ public class SenderServerAioHandler implements ServerAioHandler {
         int msgType = msg.getHeader().getMsgType();
         if(msgType == DataType.GPS.getValue()){
             //定位
-//                System.out.println("gps num ==> " + gpsNum.intValue());
             toSendGpsMessage(msg);
         }else if(msgType == DataType.ALARM.getValue()){
             //报警
-//                System.out.println("alarm num ==> " + alarmNum.intValue());
             toSendAlarmMessage(msg);
 
         }else if(msgType == DataType.HEARTBEAT.getValue()){
             //心跳
-//                System.out.println("heartbeat num ==> " + heartbeatNum.intValue());
             toSendHeartBeatMessage(msg);
-        }
+        }*/
 
     }
 
     /**
-     * JT808数据解析
+     * JT808协议数据解析
      * @param data
      */
     private Message toJt808Decoder(byte[] data){
-        String hexstr = CommonUtil.toHexString(data);
+        String hexStr = CommonUtil.toHexString(data);
         byte[] bs = doReceiveEscape(data);
         String hex = CommonUtil.toHexString(bs);
         Boolean isValid = validateChecksum(bs);
         if(!isValid){
-            logger.error("校验码验证错误：" + hex + " src -> " + hexstr);
+            logger.error("校验码验证错误, 转义后的数据 -> {}, 原始数据 -> {}", hex, hexStr);
             return null;
         }
         return decodeMessage(data);
-
     }
 
+    /**
+     * 沃瑞特C11协议数据解析
+     * @param data
+     * @return
+     */
+    private Message toWrtDecoder(String data){
+        if (data != null && data.startsWith(ProtocolSign.WRT_BEGINMARK.getValue())
+                && data.endsWith(ProtocolSign.WRT_ENDMARK.getValue())
+                && !data.contains(ProtocolSign.WRT_ENDMARK.getValue()+ProtocolSign.WRT_BEGINMARK.getValue())) {
+            //直接处理
+            return decodeMessage(data);
+        } else {
+            //粘包数据
+            Message message = new Message();
+            message.setStick(true);
+            message.setAll(data);
+            return message;
+        }
+    }
+
+    private static List<String> dealPackageSplicing(String info){
+        List<String> messages = new ArrayList<>();
+        String beginMark = ProtocolSign.WRT_BEGINMARK.getValue();
+        String endMark = ProtocolSign.WRT_ENDMARK.getValue();
+        String[] msgArr = info.split(endMark + beginMark);
+        if (msgArr.length != 1) {
+            for (int i = 0; i < msgArr.length; i++) {
+                String message;
+                if (i == 0) {
+                    message = msgArr[i] + endMark;
+                } else if (i == msgArr.length - 1) {
+                    message = beginMark + msgArr[i];
+                } else {
+                    message = beginMark + msgArr[i] + endMark;
+                }
+                messages.add(message);
+            }
+        }else {
+            logger.warn("unknown message: " + info);
+        }
+        return messages;
+    }
 
     /**
      * 转义还原(JT808协议)
@@ -186,7 +253,7 @@ public class SenderServerAioHandler implements ServerAioHandler {
     }
 
     /**
-     * 解析消息
+     * 解析消息 -> 部标808
      * @param data
      * @return
      */
@@ -214,6 +281,32 @@ public class SenderServerAioHandler implements ServerAioHandler {
         return message;
     }
 
+    /**
+     * 解析消息 -> 沃瑞特C11
+     * @param data
+     * @return
+     */
+    private Message decodeMessage(String data){
+        //设置消息头
+        Header header = new Header();
+        decodeHeader(data, header);
+        Message message = new Message();
+        message.setHeader(header);
+        message.setStick(false);
+        message.setAll(data);
+        //设置消息体
+        String body = data.substring(7, data.length()-1);
+        message.setBody(body.getBytes());
+        //设置应答消息
+        setReplyMessage(message);
+        return message;
+    }
+
+    /**
+     * 解析消息头 -> 部标808
+     * @param data
+     * @param header
+     */
     private void decodeHeader(byte[] data, Header header){
         int msgId = CommonUtil.cutBytesToInt(data, 1, 2);
         int msgBodyProps = CommonUtil.cutBytesToInt(data, 2 + 1, 2);
@@ -232,7 +325,21 @@ public class SenderServerAioHandler implements ServerAioHandler {
     }
 
     /**
-     * 设置应答消息
+     * 解析消息头 -> 沃瑞特C11
+     * @param data
+     * @param header
+     */
+    private void decodeHeader(String data, Header header){
+        String msgIdStr = data.substring(3, 7);
+        header.setMsgIdStr(msgIdStr);
+        if(StringUtils.equals(Command.WRT_MSG_ID_LOGIN, msgIdStr)){
+            String terminalPhone = data.substring(7, 22);
+            header.setTerminalPhone(terminalPhone);
+        }
+    }
+
+    /**
+     * 设置应答消息 -> 部标808
      * @param message
      */
     private void setReplyBodyAndType(Message message){
@@ -241,16 +348,14 @@ public class SenderServerAioHandler implements ServerAioHandler {
         int flowId = message.getHeader().getFlowId();
         byte[] body = message.getBody();
         String all = message.getAll();
-        if (msgId == Command.MSG_ID_TERMINAL_REGISTER)
-        {
-            logger.debug("【808】终端注册 ==> " + all);
+        if (msgId == Command.MSG_ID_TERMINAL_REGISTER) {
+            logger.debug("【808】终端注册 -> " + all);
             //1. 终端注册 ==> 终端注册应答
             byte[] sendMsg = newRegistryReplyMsg(0014, terminalPhone, flowId);
             message.setReplyBody(sendMsg);
             message.getHeader().setMsgType(DataType.Registry.getValue());
-        }else if (msgId == Command.MSG_ID_TERMINAL_AUTHENTICATION)
-        {
-            logger.debug("【808】终端鉴权 ==> " + all);
+        }else if (msgId == Command.MSG_ID_TERMINAL_AUTHENTICATION) {
+            logger.debug("【808】终端鉴权 -> " + all);
             //2. 终端鉴权 ==> 平台通用应答
             byte[] sendMsg = newCommonReplyMsg(0005, terminalPhone, flowId, msgId);
             message.setReplyBody(sendMsg);
@@ -258,10 +363,9 @@ public class SenderServerAioHandler implements ServerAioHandler {
             byte[] sendBody = newQueryPropReplyMsg(0005, terminalPhone, flowId);
             message.setExtReplyBody(sendBody);
             message.getHeader().setMsgType(DataType.Authentication.getValue());
-        }else if (msgId == Command.MSG_ID_TERMINAL_HEART_BEAT)
-        {
+        }else if (msgId == Command.MSG_ID_TERMINAL_HEART_BEAT) {
             //3. 终端心跳-消息体为空 ==> 平台通用应答
-            logger.debug("【808】终端心跳 ==> " + all);
+            logger.debug("【808】终端心跳 -> " + all);
             SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmss");
             String time = sdf.format(new Date());
             byte[] msgBody = ByteArrayUtil.hexStringToByteArray(time);//自定义心跳body为当前时间
@@ -271,36 +375,76 @@ public class SenderServerAioHandler implements ServerAioHandler {
             message.setBody(msgBody);
             message.setReplyBody(sendMsg);
             message.getHeader().setMsgType(DataType.HEARTBEAT.getValue());
-        }else if (msgId == Command.MSG_ID_TERMINAL_LOCATION_INFO_UPLOAD)
-        {
-            logger.debug("【808】终端定位（单个） ==> " + all);
+        }else if (msgId == Command.MSG_ID_TERMINAL_LOCATION_INFO_UPLOAD) {
+            logger.debug("【808】终端定位（单个）-> " + all);
             //4. 位置信息汇报 ==> 平台通用应答
             byte[] sendMsg = newCommonReplyMsg(0005, terminalPhone, flowId, msgId);
             message.setReplyBody(sendMsg);
             int alarmSign = CommonUtil.cutBytesToInt(body, 0, 4);
             message.getHeader().setMsgType(alarmSign <= 0?DataType.GPS.getValue():DataType.ALARM.getValue());
-        }else if (msgId == Command.MSG_ID_TERMINAL_LOCATION_INFO_BATCH_UPLOAD)
-        {
-            logger.debug("【808】终端定位（批量） ==> " + all);
+        }else if (msgId == Command.MSG_ID_TERMINAL_LOCATION_INFO_BATCH_UPLOAD) {
+            logger.debug("【808】终端定位（批量）-> " + all);
             //5.定位数据批量上传0x0704协议解析
             byte[] sendMsg = newCommonReplyMsg(0005, terminalPhone, flowId, msgId);
             message.setReplyBody(sendMsg);
             byte[] mb = CommonUtil.subByteArr(body, 5, body.length - 5);
             int alarmSign = CommonUtil.cutBytesToInt(mb, 0, 4);
             message.getHeader().setMsgType(alarmSign <= 0?DataType.GPS.getValue(): DataType.ALARM.getValue());
-        }else if (msgId == Command.MSG_ID_TERMINAL_PROP_QUERY_RESP)
-        {
-            logger.debug("【808】终端属性查询应答 ==> " + all);
+        }else if (msgId == Command.MSG_ID_TERMINAL_PROP_QUERY_RESP) {
+            logger.debug("【808】终端属性查询应答 -> " + all);
             //6.终端属性应答消息
             byte[] msgType = new byte[1];
             msgType[0] = 02;
             byte[] newBodyByte = CommonUtil.bytesMerge(msgType, body);
             message.setBody(newBodyByte);
             message.getHeader().setMsgType(DataType.Property.getValue());
-        }else
-        {
-            logger.error("【808】未知消息类型，终端手机号 ==> "+terminalPhone);
+        }else {
+            logger.error("【808】未知消息类型，终端手机号 -> "+terminalPhone);
         }
+    }
+
+    /**
+     * 设置应答消息 -> 沃瑞特C11
+     * @param message
+     */
+    private void setReplyMessage(Message message){
+        String msgIdStr = message.getHeader().getMsgIdStr();
+        String beginMark = ProtocolSign.WRT_BEGINMARK.getValue();
+        String endMark = ProtocolSign.WRT_ENDMARK.getValue();
+        String resp;
+        switch (msgIdStr){
+            case Command.WRT_MSG_ID_LOGIN:
+                String date = DateFormatUtils.format(new Date(DateUtil.getUTCTime()), "yyyyMMddHHmmss");
+                resp = Command.WRT_MSG_LOGIN_RESP + date;
+                break;
+            case Command.WRT_MSG_ID_TERMINAL_LOCATION:
+                resp = Command.WRT_MSG_LOCATION_RESP;
+                break;
+            case Command.WRT_MSG_ID_TERMINAL_ALARM:
+                resp = Command.WRT_MSG_ALARM_RESP;
+                break;
+            case Command.WRT_MSG_ID_TERMINAL_HEARTBEAT:
+                resp = Command.WRT_MSG_HEARTBEAT_RESP;
+                break;
+            case Command.WRT_MSG_ID_TERMINAL_CONTROLLER:
+                resp = Command.WRT_MSG_CONTROLLER_RESP;
+                break;
+            case Command.WRT_MSG_ID_TERMINAL_STATUS:
+                resp = Command.WRT_MSG_STATUS_RESP;
+                break;
+            case Command.WRT_MSG_ID_TERMINAL_IMSI:
+                resp = Command.WRT_MSG_IMSI_RESP;
+                break;
+            default:
+                resp = "";
+                logger.warn("位置的消息ID -> {}", msgIdStr);
+                break;
+        }
+        if(StringUtils.isEmpty(resp)){
+            return;
+        }
+        String replyMsg = beginMark + resp + endMark;
+        message.setReplyBody(replyMsg.getBytes());
     }
 
     /**
@@ -530,30 +674,30 @@ public class SenderServerAioHandler implements ServerAioHandler {
         gpsNum.incrementAndGet();
         CopyOnWriteArrayList<Channel> channels = mqInitializer.gpsChannels;
         Channel channel = channels.get(gpsNum.intValue() % channels.size());
-        String qname = mqInitializer.gpsQueuePrex + (gpsNum.intValue() % mqInitializer.gpsQueueCount + 1);
+        String queueName = mqInitializer.gpsQueuePrefix + (gpsNum.intValue() % mqInitializer.gpsQueueCount + 1);
         byte[] sign = new byte[1];
         sign[0] = 01;
         byte[] newBody = CommonUtil.bytesMerge(sign, message.getBody());
         byte[] sendMsg = CommonUtil.bytesMerge(
                 ByteArrayUtil.hexStringToByteArray(message.getHeader().getTerminalPhone()), newBody);
         String hex = ByteArrayUtil.toHexString(sendMsg);
-        mqSender.send(channel, hex.getBytes(Charset.forName("UTF-8")), message, qname);
+        mqSender.send(channel, hex.getBytes(Charset.forName("UTF-8")), message, queueName);
     }
 
     private void toSendAlarmMessage(Message message){
         alarmNum.incrementAndGet();
         CopyOnWriteArrayList<Channel> channels = mqInitializer.alarmChannels;
         Channel channel = channels.get(alarmNum.intValue() % channels.size());
-        String qname = mqInitializer.alarmQueuePrex + (alarmNum.intValue() % mqInitializer.alarmQueueCount + 1);
+        String queueName = mqInitializer.alarmQueuePrefix + (alarmNum.intValue() % mqInitializer.alarmQueueCount + 1);
         byte[] sendMsg = CommonUtil.bytesMerge(ByteArrayUtil
                 .hexStringToByteArray(message.getHeader().getTerminalPhone()), message.getBody());
         String hex = ByteArrayUtil.toHexString(sendMsg);
-        mqSender.send(channel, hex.getBytes(Charset.forName("UTF-8")), message, qname);
+        mqSender.send(channel, hex.getBytes(Charset.forName("UTF-8")), message, queueName);
 
         //报警推送到电动车平台MQ一份
         CopyOnWriteArrayList<Channel> chs = mqInitializer.businessChannels;
         Channel ch = chs.get(alarmNum.intValue() % chs.size());
-        String qn = mqInitializer.businessQueuePrex +
+        String qn = mqInitializer.businessQueuePrefix +
                 (alarmNum.intValue() % mqInitializer.businessQueueCount + mqInitializer.businessQueueStart);
         mqSender.send(ch, hex.getBytes(Charset.forName("UTF-8")), message, qn);
     }
@@ -562,10 +706,10 @@ public class SenderServerAioHandler implements ServerAioHandler {
         heartbeatNum.incrementAndGet();
         CopyOnWriteArrayList<Channel> channels = mqInitializer.heartbeatChannels;
         Channel channel = channels.get(heartbeatNum.intValue() % channels.size());
-        String qname = mqInitializer.heartbeatQueuePrex + (heartbeatNum.intValue() % mqInitializer.heartbeatQueueCount + 1);
+        String queueName = mqInitializer.heartbeatQueuePrefix + (heartbeatNum.intValue() % mqInitializer.heartbeatQueueCount + 1);
         byte[] sendMsg = CommonUtil.bytesMerge(ByteArrayUtil
                 .hexStringToByteArray(message.getHeader().getTerminalPhone()), message.getBody());
         String hex = ByteArrayUtil.toHexString(sendMsg);
-        mqSender.send(channel, hex.getBytes(Charset.forName("UTF-8")), message, qname);
+        mqSender.send(channel, hex.getBytes(Charset.forName("UTF-8")), message, queueName);
     }
 }

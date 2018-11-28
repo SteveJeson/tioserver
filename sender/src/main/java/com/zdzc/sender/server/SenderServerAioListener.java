@@ -42,7 +42,5 @@ public class SenderServerAioListener implements ServerAioListener {
     @Override
     public void onBeforeClose(ChannelContext channelContext, Throwable throwable, String s, boolean b) throws Exception {
 //        System.out.println("===============before close================");
-        int clients = channelContext.getGroupContext().connections.size();
-        logger.info("after close, client num -> " + clients);
     }
 }

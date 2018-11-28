@@ -1,8 +1,11 @@
-package com.zdzc.sender.util;
+package com.zdzc.sender.Enum;
 
+/**
+ * 数据类型
+ */
 public enum DataType {
     GPS(1, "终端定位"), ALARM(2, "终端报警"), HEARTBEAT(3, "终端心跳"),
-    Registry(4, "终端注册"), Authentication(5, "终端鉴权"), Property(6, "终端属性"), BUSINESS(7, "报警业务");
+    Registry(4, "终端注册"), Authentication(5, "终端鉴权"), Property(6, "终端属性"), BUSINESS(7, "报警业务"), CONTROLLER(8, "控制器");
 
     private int value;
     private String desc;
@@ -16,18 +19,9 @@ public enum DataType {
         return value;
     }
 
-    public void setValue(int value) {
-        this.value = value;
-    }
-
     public String getDesc() {
         return desc;
     }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
-    }
-
 
     /**
      * 根据值返回名称
@@ -42,7 +36,6 @@ public enum DataType {
         }
         return null;
     }
-
 
     /**
      * 根据值返回描述

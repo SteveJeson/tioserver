@@ -8,6 +8,8 @@ public class Header {
 
     private int msgId;  // 消息ID
 
+    private String msgIdStr; //字符串形式消息ID
+
     private int msgBodyLength;  // 消息体长度
 
     private String terminalPhone;   //终端手机号
@@ -90,5 +92,13 @@ public class Header {
 
     public void setMsgType(int msgType) {
         this.msgType = msgType;
+    }
+
+    public String getMsgIdStr() {
+        return msgIdStr;
+    }
+
+    public void setMsgIdStr(String msgIdStr) {
+        this.msgIdStr = msgIdStr;
     }
 }

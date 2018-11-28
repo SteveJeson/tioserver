@@ -30,6 +30,10 @@ public class Message extends Packet {
      */
     private byte[] extReplyBody;
 
+    /**
+     * 是否粘包
+     */
+    private Boolean isStick;
 
     public Message() {
     }
@@ -73,5 +77,13 @@ public class Message extends Packet {
 
     public void setExtReplyBody(byte[] extReplyBody) {
         this.extReplyBody = extReplyBody;
+    }
+
+    public Boolean getStick() {
+        return isStick;
+    }
+
+    public void setStick(Boolean stick) {
+        isStick = stick;
     }
 }
