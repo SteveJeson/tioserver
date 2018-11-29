@@ -13,7 +13,9 @@ public class SenderServerAioListener implements ServerAioListener {
 
     @Override
     public void onAfterConnected(ChannelContext channelContext, boolean b, boolean b1) throws Exception {
-        channelContext.setAttribute(new ServerSessionContext());
+        ServerSessionContext context = new ServerSessionContext();
+        channelContext.setAttribute(context);
+//        ServerStarter.serverGroupContext.ids.bind(channelContext);
         int clients = channelContext.getGroupContext().connections.size();
         logger.info("client num -> " + clients);
 
@@ -42,5 +44,10 @@ public class SenderServerAioListener implements ServerAioListener {
     @Override
     public void onBeforeClose(ChannelContext channelContext, Throwable throwable, String s, boolean b) throws Exception {
 //        System.out.println("===============before close================");
+        String channelId = channelContext.getId();
+        logger.info("will remove channel -> {}", channelId);
+        String value = SenderServerAioHandler.channelMap.get(channelId);
+        SenderServerAioHandler.channelMap.remove(channelId, value);
+        SenderServerAioHandler.channelMap.remove(value, channelId);
     }
 }

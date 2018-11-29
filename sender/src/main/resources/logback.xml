@@ -16,22 +16,13 @@
             <level>info</level>
         </filter>
         <encoder>
-            <pattern>%date %level [%thread] %msg%n
+            <pattern>%date %level [%thread] [%file : %line] %msg%n
             </pattern>
         </encoder>
     </appender>
 
     <appender name="debug_file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${path}/Debug/debug.log</file>
-        <!--<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
-            <!--&lt;!&ndash; 每天一归档 &ndash;&gt;-->
-            <!--<fileNamePattern>${path}/debug.log.%d{yyyy-MM-dd}-%i.zip</fileNamePattern>-->
-            <!--<maxHistory>${maxHistory}</maxHistory>-->
-            <!--<timeBasedFileNamingAndTriggeringPolicy-->
-                    <!--class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">-->
-                <!--<maxFileSize>${maxFileSize}</maxFileSize>-->
-            <!--</timeBasedFileNamingAndTriggeringPolicy>-->
-        <!--</rollingPolicy>-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${path}/Debug/debug.log.%d{yyyy-MM-dd}-%i.zip</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy

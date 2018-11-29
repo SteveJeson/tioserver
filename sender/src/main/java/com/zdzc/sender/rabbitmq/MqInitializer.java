@@ -1,8 +1,6 @@
 package com.zdzc.sender.rabbitmq;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.*;
 import com.zdzc.sender.Enum.ProtocolType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,8 +149,14 @@ public class MqInitializer {
     @Value("${wrt.controller.queue.prefix}")
     public String wrtControllerQueuePrefix;
 
+    @Value("${wrt.controller.queue.count}")
+    public int wrtControllerQueueCount;
+
     @Value("${wrt.controller.queue.start}")
     public int wrtControllerQueueStart;
+
+    @Value("${wrt.command.queue.reply.name}")
+    public String wrtCmdReplyQueueName;
 
     public ConnectionFactory factory;
 
@@ -174,7 +178,7 @@ public class MqInitializer {
 
     public CopyOnWriteArrayList<Channel> businessChannels = new CopyOnWriteArrayList<>();
 
-    public CopyOnWriteArrayList<Channel> replyChannels = new CopyOnWriteArrayList<>();
+    public Channel replyChannel;
 
     /**
      * 配置MQ
@@ -192,7 +196,6 @@ public class MqInitializer {
             logger.info("即将配置消息队列 -> {}", ProtocolType.WRT.getDesc());
             configWrtMq();
         }
-
     }
 
     /**
@@ -251,9 +254,10 @@ public class MqInitializer {
         //控制器
         for(int i = 0;i < wrtControllerConnCount;i++){
             logger.info("create CONTROLLER connection -> {}", i+1);
-            createQueues(this.factory.newConnection(), wrtControllerQueuePrefix, wrtControllerChannelCount, wrtControllerChannelCount, wrtControllerQueueStart, wrtControllerChannels);
+            createQueues(this.factory.newConnection(), wrtControllerQueuePrefix, wrtControllerChannelCount, wrtControllerQueueCount, wrtControllerQueueStart, wrtControllerChannels);
         }
 
+        createQueues(this.factory.newConnection(), wrtCmdReplyQueueName);
     }
 
     /**
@@ -269,7 +273,7 @@ public class MqInitializer {
         this.factory.setNetworkRecoveryInterval(interval);
     }
 
-    /**创建消息队列
+    /**通过规则创建消息队列
      * @param connection 连接对象
      * @param QueuePrefix 队列前缀
      * @param channelCount 通道数量
@@ -293,5 +297,18 @@ public class MqInitializer {
         }
     }
 
+    /**
+     * 直接创建消息队列
+     * @param connection
+     * @param queueName
+     */
+    public void createQueues(Connection connection, String queueName){
+        try {
+            replyChannel = connection.createChannel();
+            replyChannel.queueDeclare(queueName, true, false, false, null);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+    }
 
 }

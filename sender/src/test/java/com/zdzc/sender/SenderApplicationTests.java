@@ -22,6 +22,13 @@ public class SenderApplicationTests {
         System.out.println(str);
         String date = DateFormatUtils.format(new Date(DateUtil.getUTCTime()), "yyyyMMddHHmmss");
         System.out.println(date);
+        String a = "f";
+        try{
+            int b = Integer.valueOf(a);
+            System.out.println(b);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
     }
 
 }
