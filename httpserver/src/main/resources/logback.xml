@@ -7,13 +7,13 @@
 
     <!--输出sql语句-->
     <logger name="com.zdzc" level="debug"/>
-    <property name="path" value="/Logs/collector/sender"></property>
+    <property name="path" value="/Logs/collector/httpserver"></property>
     <property name="maxHistory" value="30"/>
     <property name="maxFileSize" value="50MB"/>
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>debug</level>
+            <level>info</level>
         </filter>
         <encoder>
             <pattern>%date %level [%thread] [%file : %line] %msg%n

@@ -3,7 +3,7 @@
     <!--<include resource="org/springframework/boot/logging/logback/base.xml"/>-->
     <!--<include resource="org/springframework/boot/logging/logback/console-appender.xml"/>-->
 
-    <contextName>logback</contextName>
+    <contextName>slf4j</contextName>
 
     <!--输出sql语句-->
     <logger name="com.zdzc" level="debug"/>
@@ -13,7 +13,7 @@
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>debug</level>
+            <level>info</level>
         </filter>
         <encoder>
             <pattern>%date %level [%thread] [%file : %line] %msg%n

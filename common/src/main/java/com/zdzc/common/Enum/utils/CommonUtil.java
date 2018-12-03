@@ -1,4 +1,4 @@
-package com.zdzc.sender.util;
+package com.zdzc.common.Enum.utils;
 
 import org.apache.commons.lang.StringUtils;
 

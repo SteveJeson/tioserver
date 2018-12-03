@@ -1,15 +1,12 @@
 package com.zdzc.sender;
 
-import com.zdzc.sender.util.DateUtil;
+import com.zdzc.common.Enum.utils.DateUtil;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.junit.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
-//@RunWith(SpringRunner.class)
-@SpringBootTest
 public class SenderApplicationTests {
 
     @Test

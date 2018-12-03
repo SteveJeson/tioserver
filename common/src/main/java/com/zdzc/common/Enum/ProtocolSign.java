@@ -1,4 +1,4 @@
-package com.zdzc.sender.Enum;
+package com.zdzc.common.Enum;
 
 /**
  * 协议开始标识符

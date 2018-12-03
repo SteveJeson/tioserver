@@ -3,7 +3,7 @@ package com.zdzc.sender.rabbitmq;
 import ch.qos.logback.core.encoder.ByteArrayUtil;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.MessageProperties;
-import com.zdzc.sender.Enum.ProtocolType;
+import com.zdzc.common.Enum.ProtocolType;
 import com.zdzc.sender.client.SenderClientStarter;
 import com.zdzc.sender.packet.Message;
 import org.apache.commons.lang.StringUtils;

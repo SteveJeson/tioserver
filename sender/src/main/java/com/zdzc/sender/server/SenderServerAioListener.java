@@ -1,6 +1,7 @@
 package com.zdzc.sender.server;
 
 import com.zdzc.sender.server.common.ServerSessionContext;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tio.core.ChannelContext;
@@ -47,7 +48,10 @@ public class SenderServerAioListener implements ServerAioListener {
         String channelId = channelContext.getId();
         logger.info("will remove channel -> {}", channelId);
         String value = SenderServerAioHandler.channelMap.get(channelId);
-        SenderServerAioHandler.channelMap.remove(channelId, value);
-        SenderServerAioHandler.channelMap.remove(value, channelId);
+        if(StringUtils.isNotEmpty(value)){
+            SenderServerAioHandler.channelMap.remove(channelId, value);
+            SenderServerAioHandler.channelMap.remove(value, channelId);
+        }
+
     }
 }

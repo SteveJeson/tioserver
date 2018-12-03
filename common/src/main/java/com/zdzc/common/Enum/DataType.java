@@ -1,4 +1,4 @@
-package com.zdzc.sender.Enum;
+package com.zdzc.common.Enum;
 
 /**
  * 数据类型
