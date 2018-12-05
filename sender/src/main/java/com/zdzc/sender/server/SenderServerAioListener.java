@@ -1,6 +1,6 @@
 package com.zdzc.sender.server;
 
-import com.zdzc.sender.server.common.ServerSessionContext;
+import com.zdzc.common.ServerSessionContext;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

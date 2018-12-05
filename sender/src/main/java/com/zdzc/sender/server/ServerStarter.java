@@ -1,7 +1,7 @@
 package com.zdzc.sender.server;
 
 import com.zdzc.common.Enum.ProtocolType;
-import com.zdzc.sender.client.SenderClientStarter;
+import com.zdzc.tcpclient.client.TcpClientStarter;
 import org.apache.commons.lang.StringUtils;
 import org.tio.server.ServerGroupContext;
 import org.tio.server.TioServer;
@@ -27,6 +27,6 @@ public class ServerStarter {
         }
         String remoteIp = P.get("remote.server.host");
         int remotePort = P.getInt("remote.server.port");
-        SenderClientStarter.start(remoteIp, remotePort);
+        TcpClientStarter.start(remoteIp, remotePort);
     }
 }

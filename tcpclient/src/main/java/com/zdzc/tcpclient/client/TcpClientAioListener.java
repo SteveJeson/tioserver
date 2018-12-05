@@ -1,14 +1,13 @@
-package com.zdzc.sender.client;
+package com.zdzc.tcpclient.client;
 
-import com.zdzc.sender.server.common.ServerSessionContext;
 import org.tio.client.intf.ClientAioListener;
 import org.tio.core.ChannelContext;
 import org.tio.core.intf.Packet;
 
-public class SenderClientAioListener implements ClientAioListener {
+public class TcpClientAioListener implements ClientAioListener {
     @Override
     public void onAfterConnected(ChannelContext channelContext, boolean isConnected, boolean isReconnect) throws Exception {
-        channelContext.setAttribute(new ServerSessionContext());
+//        channelContext.setAttribute(new ServerSessionContext());
     }
 
     @Override

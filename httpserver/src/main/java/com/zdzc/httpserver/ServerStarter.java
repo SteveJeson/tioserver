@@ -1,20 +1,19 @@
 package com.zdzc.httpserver;
 
 import com.zdzc.httpserver.init.HttpServerInit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.zdzc.tcpclient.client.TcpClientStarter;
 import org.tio.utils.jfinal.P;
 import rabbitmq.MqInitializer;
 
 public class ServerStarter {
-    private static Logger log = LoggerFactory.getLogger(ServerStarter.class);
-
 
     public static void main(String[] args) throws Exception {
         P.use("application.properties");
-
         HttpServerInit.init();
-        MqInitializer.init();
+        MqInitializer.init();//初始化MQ
+        String remoteIp = P.get("remote.server.host");
+        int remotePort = P.getInt("remote.server.port");
+        TcpClientStarter.start(remoteIp, remotePort);
     }
 
     /**

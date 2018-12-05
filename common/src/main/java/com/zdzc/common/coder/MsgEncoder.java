@@ -1,6 +1,6 @@
-package com.zdzc.sender.util;
+package com.zdzc.common.coder;
 
-import com.zdzc.sender.packet.Message;
+import com.zdzc.common.packet.Message;
 import org.tio.core.GroupContext;
 import org.tio.core.intf.Packet;
 

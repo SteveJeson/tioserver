@@ -1,4 +1,4 @@
-package com.zdzc.sender.server.common;
+package com.zdzc.common;
 
 public class ServerSessionContext {
     private String token = null;

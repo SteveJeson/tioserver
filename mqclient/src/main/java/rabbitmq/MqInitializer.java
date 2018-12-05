@@ -28,11 +28,11 @@ public class MqInitializer {
 
     public static int gpsConnCount = P.getInt("gps.connection.count");
 
-    public static int wrtGpsConnCount = P.getInt("wrt.gps.connection.count");
+    public static int wrtGpsConnCount = P.getInt("wrt.gps.connection.count", 0);
 
     public static int gpsChannelCount = P.getInt("gps.channel.count");
 
-    public static int wrtGpsChannelCount = P.getInt("wrt.gps.channel.count");
+    public static int wrtGpsChannelCount = P.getInt("wrt.gps.channel.count", 0);
 
     public static String gpsQueuePrefix = P.get("gps.queue.prefix");
 
@@ -40,19 +40,19 @@ public class MqInitializer {
 
     public static int gpsQueueCount = P.getInt("gps.queue.count");
 
-    public static int wrtGpsQueueCount = P.getInt("wrt.gps.queue.count");
+    public static int wrtGpsQueueCount = P.getInt("wrt.gps.queue.count",0);
 
     public static int gpsQueueStart = P.getInt("gps.queue.start");
 
-    public static int wrtGpsQueueStart = P.getInt("wrt.gps.queue.start");
+    public static int wrtGpsQueueStart = P.getInt("wrt.gps.queue.start", 0);
 
     public static int alarmConnCount = P.getInt("alarm.connection.count");
 
-    public static int wrtAlarmConnCount = P.getInt("wrt.alarm.connection.count");
+    public static int wrtAlarmConnCount = P.getInt("wrt.alarm.connection.count", 0);
 
     public static int alarmChannelCount = P.getInt("alarm.channel.count");
 
-    public static int wrtAlarmChannelCount = P.getInt("wrt.alarm.channel.count");
+    public static int wrtAlarmChannelCount = P.getInt("wrt.alarm.channel.count", 0);
 
     public static String alarmQueuePrefix = P.get("alarm.queue.prefix");
 
@@ -60,19 +60,19 @@ public class MqInitializer {
 
     public static int alarmQueueCount = P.getInt("alarm.queue.count");
 
-    public static int wrtAlarmQueueCount = P.getInt("wrt.alarm.queue.count");
+    public static int wrtAlarmQueueCount = P.getInt("wrt.alarm.queue.count", 0);
 
     public static int alarmQueueStart = P.getInt("alarm.queue.start");
 
-    public static int wrtAlarmQueueStart = P.getInt("wrt.alarm.queue.start");
+    public static int wrtAlarmQueueStart = P.getInt("wrt.alarm.queue.start", 0);
 
     public static int heartbeatConnCount = P.getInt("heartbeat.connection.count");
 
-    public static int wrtHeartbeatConnCount = P.getInt("wrt.heartbeat.connection.count");
+    public static int wrtHeartbeatConnCount = P.getInt("wrt.heartbeat.connection.count", 0);
 
     public static int heartbeatChannelCount = P.getInt("heartbeat.channel.count");
 
-    public static int wrtHeartbeatChannelCount = P.getInt("wrt.heartbeat.channel.count");
+    public static int wrtHeartbeatChannelCount = P.getInt("wrt.heartbeat.channel.count", 0);
 
     public static String heartbeatQueuePrefix = P.get("heartbeat.queue.prefix");
 
@@ -80,11 +80,11 @@ public class MqInitializer {
 
     public static int heartbeatQueueCount = P.getInt("heartbeat.queue.count");
 
-    public static int wrtHeartbeatQueueCount = P.getInt("wrt.heartbeat.queue.count");
+    public static int wrtHeartbeatQueueCount = P.getInt("wrt.heartbeat.queue.count", 0);
 
     public static int heartbeatQueueStart = P.getInt("heartbeat.queue.start");
 
-    public static int wrtHeartbeatQueueStart = P.getInt("wrt.heartbeat.queue.start");
+    public static int wrtHeartbeatQueueStart = P.getInt("wrt.heartbeat.queue.start", 0);
 
     public static int businessConnCount = P.getInt("business.connection.count");
 
@@ -96,15 +96,15 @@ public class MqInitializer {
 
     public static int businessQueueStart = P.getInt("business.queue.start");
 
-    public static int wrtControllerConnCount = P.getInt("wrt.controller.connection.count");
+    public static int wrtControllerConnCount = P.getInt("wrt.controller.connection.count", 0);
 
-    public static int wrtControllerChannelCount = P.getInt("wrt.controller.channel.count");
+    public static int wrtControllerChannelCount = P.getInt("wrt.controller.channel.count", 0);
 
     public static String wrtControllerQueuePrefix = P.get("wrt.controller.queue.prefix");
 
-    public static int wrtControllerQueueCount = P.getInt("wrt.controller.queue.count");
+    public static int wrtControllerQueueCount = P.getInt("wrt.controller.queue.count", 0);
 
-    public static int wrtControllerQueueStart = P.getInt("wrt.controller.queue.start");
+    public static int wrtControllerQueueStart = P.getInt("wrt.controller.queue.start", 0);
 
     public static String wrtCmdReplyQueueName = P.get("wrt.command.queue.reply.name");
 

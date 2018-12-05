@@ -1,4 +1,4 @@
-package com.zdzc.sender.packet;
+package com.zdzc.common.packet;
 
 import org.tio.core.intf.Packet;
 

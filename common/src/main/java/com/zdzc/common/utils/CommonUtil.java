@@ -1,4 +1,4 @@
-package com.zdzc.common.Enum.utils;
+package com.zdzc.common.utils;
 
 import org.apache.commons.lang.StringUtils;
 

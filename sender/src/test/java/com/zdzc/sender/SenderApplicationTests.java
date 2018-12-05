@@ -1,6 +1,6 @@
 package com.zdzc.sender;
 
-import com.zdzc.common.Enum.utils.DateUtil;
+import com.zdzc.common.utils.DateUtil;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.junit.Test;
 

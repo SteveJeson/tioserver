@@ -27,12 +27,12 @@ public class HttpServerInit {
         int port = P.getInt("http.port");//启动端口
         httpConfig = new HttpConfig(port, null, null, null);
         httpConfig.setUseSession(false);
-        httpConfig.setCheckHost(false);
-
+        httpConfig.setCheckHost(true);
         requestHandler = new DefaultHttpRequestHandler(httpConfig, ServerStarter.class);//第二个参数也可以是数组
 
         httpServerStarter = new HttpServerStarter(httpConfig, requestHandler);
         serverGroupContext = httpServerStarter.getServerGroupContext();
+        serverGroupContext.setHeartbeatTimeout(0);
         httpServerStarter.start(); //启动http服务器
     }
 

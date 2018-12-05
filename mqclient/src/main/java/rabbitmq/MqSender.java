@@ -1,11 +1,11 @@
-package com.zdzc.sender.rabbitmq;
+package rabbitmq;
 
 import ch.qos.logback.core.encoder.ByteArrayUtil;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.MessageProperties;
 import com.zdzc.common.Enum.ProtocolType;
-import com.zdzc.sender.client.SenderClientStarter;
-import com.zdzc.sender.packet.Message;
+import com.zdzc.common.packet.Message;
+import com.zdzc.tcpclient.client.TcpClientStarter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +37,6 @@ public class MqSender {
     private void sendToRemote(String message){
         Message sendBody = new Message();
         sendBody.setBody(ByteArrayUtil.hexStringToByteArray(message));
-        Tio.send(SenderClientStarter.clientChannelContext, sendBody);
+        Tio.send(TcpClientStarter.clientChannelContext, sendBody);
     }
 }

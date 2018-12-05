@@ -1,6 +1,6 @@
-package com.zdzc.sender.client;
+package com.zdzc.tcpclient.client;
 
-import com.zdzc.sender.util.MsgEncoder;
+import com.zdzc.common.coder.MsgEncoder;
 import org.tio.client.intf.ClientAioHandler;
 import org.tio.core.ChannelContext;
 import org.tio.core.GroupContext;
@@ -9,7 +9,7 @@ import org.tio.core.intf.Packet;
 
 import java.nio.ByteBuffer;
 
-public class SenderClientAioHandler implements ClientAioHandler {
+public class TcpClientAioHandler implements ClientAioHandler {
     @Override
     public Packet heartbeatPacket() {
         return null;

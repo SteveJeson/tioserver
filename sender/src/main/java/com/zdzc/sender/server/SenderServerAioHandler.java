@@ -5,13 +5,14 @@ import com.rabbitmq.client.Channel;
 import com.zdzc.common.Enum.DataType;
 import com.zdzc.common.Enum.ProtocolSign;
 import com.zdzc.common.Enum.ProtocolType;
-import com.zdzc.sender.packet.Header;
-import com.zdzc.sender.packet.Message;
-import com.zdzc.sender.rabbitmq.MqSender;
+import com.zdzc.common.coder.MsgDecoder;
+import com.zdzc.common.packet.Header;
+import com.zdzc.common.packet.Message;
+import rabbitmq.MqSender;
 import com.zdzc.sender.util.Command;
-import com.zdzc.common.Enum.utils.CommonUtil;
-import com.zdzc.common.Enum.utils.DateUtil;
-import com.zdzc.sender.util.MsgEncoder;
+import com.zdzc.common.utils.CommonUtil;
+import com.zdzc.common.utils.DateUtil;
+import com.zdzc.common.coder.MsgEncoder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
@@ -229,9 +230,9 @@ public class SenderServerAioHandler implements ServerAioHandler {
      */
     private Message toJt808Decoder(byte[] data){
         String hexStr = CommonUtil.toHexString(data);
-        byte[] bs = doReceiveEscape(data);
+        byte[] bs = MsgDecoder.doReceiveEscape(data);
         String hex = CommonUtil.toHexString(bs);
-        Boolean isValid = validateChecksum(bs);
+        Boolean isValid = MsgDecoder.validateChecksum(bs);
         if(!isValid){
             logger.error("校验码验证错误, 转义后的数据 -> {}, 原始数据 -> {}", hex, hexStr);
             return null;
@@ -288,73 +289,6 @@ public class SenderServerAioHandler implements ServerAioHandler {
             logger.warn("unknown message: " + info);
         }
         return messages;
-    }
-
-    /**
-     * 转义还原(JT808协议)
-     * 0x7d 0x01 -> 0x7d
-     * 0x7d 0x02 -> 0x7e
-     * @param data
-     * @return
-     */
-    private byte[] doReceiveEscape(byte[] data){
-        List<Byte> list = new LinkedList<>();
-        for (int i = 0; i < data.length; i++)
-        {
-            if (data[i] == 0x7d && data[i + 1] == 0x01)
-            {
-                list.add((byte)0x7d);
-                i++;
-            }
-            else if (data[i] == 0x7d && data[i + 1] == 0x02)
-            {
-                list.add((byte)0x7e);
-                i++;
-            }
-            else
-            {
-                list.add(data[i]);
-            }
-        }
-        ByteBuffer bb = ByteBuffer.allocate(list.size());
-        for (Byte b : list) {
-            bb.put(b);
-        }
-        return bb.array();
-    }
-
-    /**
-     * 验证校验和(JT808协议)
-     * @param data
-     * @return
-     */
-    private Boolean validateChecksum(byte[] data){
-        // 1. 去掉分隔符之后，最后一位就是校验码
-        int checkSumInPkg = data[data.length - 1 - 1];
-        int calculatedCheckSum = calculateChecksum(data, 1, data.length - 1 - 1);
-        if (checkSumInPkg != calculatedCheckSum)
-        {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * 计算校验和(JT808协议) -> 部标808
-     *从开始标识符后一位到校验和前一位做异或运算
-     * @param data
-     * @param from
-     * @param to
-     * @return
-     */
-    private int calculateChecksum(byte[] data, int from, int to){
-        int cs = 0;
-        for (int i = from; i < to; i++)
-        {
-            cs ^= data[i];
-
-        }
-        return cs;
     }
 
     /**
@@ -617,7 +551,7 @@ public class SenderServerAioHandler implements ServerAioHandler {
         buffer.put(bt7);
         buffer.put(bt8);
         // 校验码
-        int checkSum = calculateChecksum(buffer.array(), 1, buffer.array().length);
+        int checkSum = MsgDecoder.calculateChecksum(buffer.array(), 1, buffer.array().length);
         byte[] bt9 = CommonUtil.integerTo1Bytes(checkSum);
         len += bt9.length;
         len += bt1.length;
@@ -723,7 +657,7 @@ public class SenderServerAioHandler implements ServerAioHandler {
         buffer.put(bt7);
         buffer.put(bt8);
         // 校验码
-        int checkSum = calculateChecksum(buffer.array(), 1, buffer.array().length);
+        int checkSum = MsgDecoder.calculateChecksum(buffer.array(), 1, buffer.array().length);
         byte[] bt9 = CommonUtil.integerTo1Bytes(checkSum);
         len += bt9.length;
         len += bt1.length;
@@ -768,7 +702,7 @@ public class SenderServerAioHandler implements ServerAioHandler {
         buffer.put(bt5);
 
         // 6.校验码
-        int checkSum = calculateChecksum(buffer.array(), 1, buffer.array().length);
+        int checkSum = MsgDecoder.calculateChecksum(buffer.array(), 1, buffer.array().length);
         byte[] bt9 = CommonUtil.integerTo1Bytes(checkSum);
         len += bt9.length;
         len += bt1.length;

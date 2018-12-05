@@ -1,4 +1,4 @@
-package com.zdzc.sender.packet;
+package com.zdzc.common.packet;
 
 public class Header {
 

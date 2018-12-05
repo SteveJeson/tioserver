@@ -17,6 +17,7 @@
         <module>httpserver</module>
         <module>sender</module>
         <module>receiver</module>
+        <module>tcpclient</module>
     </modules>
 
     <properties>
