@@ -4,6 +4,7 @@ import com.zdzc.httpserver.init.HttpServerInit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tio.utils.jfinal.P;
+import rabbitmq.MqInitializer;
 
 public class ServerStarter {
     private static Logger log = LoggerFactory.getLogger(ServerStarter.class);
@@ -13,6 +14,7 @@ public class ServerStarter {
         P.use("application.properties");
 
         HttpServerInit.init();
+        MqInitializer.init();
     }
 
     /**
