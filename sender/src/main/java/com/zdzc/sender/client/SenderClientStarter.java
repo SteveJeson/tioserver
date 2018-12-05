@@ -22,6 +22,7 @@ public class SenderClientStarter {
 
     public static void start(String host, int port) throws Exception {
         clientGroupContext.setName("sender-tio-client");
+        clientGroupContext.setHeartbeatTimeout(240000);//设为0或者负数则取消框架层面的心跳
         tioClient = new TioClient(clientGroupContext);
         Node serverNode = new Node(host, port);
         clientChannelContext = tioClient.connect(serverNode);
