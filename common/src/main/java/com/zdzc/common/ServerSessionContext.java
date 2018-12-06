@@ -5,10 +5,6 @@ public class ServerSessionContext {
 
     private String userid = null;
 
-    /**
-     *
-     * @author tanyaowu
-     */
     public ServerSessionContext() {
     }
 

@@ -9,7 +9,7 @@
     <packaging>pom</packaging>
 
     <name>collector</name>
-    <description>Collector project for Spring Boot</description>
+    <description>Collector project</description>
 
     <modules>
         <module>common</module>
@@ -99,6 +99,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

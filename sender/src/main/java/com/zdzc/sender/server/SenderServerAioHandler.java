@@ -237,7 +237,7 @@ public class SenderServerAioHandler implements ServerAioHandler {
             logger.error("校验码验证错误, 转义后的数据 -> {}, 原始数据 -> {}", hex, hexStr);
             return null;
         }
-        return decodeMessage(data);
+        return decodeMessage(bs);
     }
 
     /**

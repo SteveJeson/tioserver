@@ -16,10 +16,6 @@ public class ServerStarter {
         TcpClientStarter.start(remoteIp, remotePort);
     }
 
-    /**
-     *
-     * @author tanyaowu
-     */
     public ServerStarter() {
     }
 }
