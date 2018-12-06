@@ -9,13 +9,14 @@
     <packaging>jar</packaging>
 
     <name>httpserver</name>
-    <description>HttpServer project for Spring Boot</description>
+    <description>HttpServer project</description>
 
     <parent>
         <artifactId>collector</artifactId>
         <groupId>com.zdzc</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -23,11 +24,6 @@
     </properties>
 
     <dependencies>
-        <!--<dependency>-->
-            <!--<artifactId>collector</artifactId>-->
-            <!--<groupId>com.zdzc</groupId>-->
-            <!--<version>0.0.1-SNAPSHOT</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>com.zdzc</groupId>
             <artifactId>mqclient</artifactId>
@@ -43,28 +39,31 @@
             <artifactId>tcpclient</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.t-io</groupId>
-            <artifactId>tio-core</artifactId>
-            <version>3.2.2.v20181122-RELEASE</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.t-io</groupId>
-            <artifactId>tio-http-server</artifactId>
-            <version>3.2.2.v20181122-RELEASE</version>
-        </dependency>
     </dependencies>
 
-    <!--<build>-->
-        <!--<plugins>-->
-            <!--<plugin>-->
-                <!--<groupId>org.springframework.boot</groupId>-->
-                <!--<artifactId>spring-boot-maven-plugin</artifactId>-->
-            <!--</plugin>-->
-        <!--</plugins>-->
-    <!--</build>-->
-
-
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.zdzc.httpserver.ServerStarter</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

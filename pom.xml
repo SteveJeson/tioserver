@@ -16,7 +16,6 @@
         <module>mqclient</module>
         <module>httpserver</module>
         <module>sender</module>
-        <module>receiver</module>
         <module>tcpclient</module>
     </modules>
 
@@ -37,6 +36,19 @@
         <dependency>
             <groupId>org.t-io</groupId>
             <artifactId>tio-core</artifactId>
+            <version>3.2.2.v20181122-RELEASE</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.t-io/tio-utils -->
+        <!--<dependency>-->
+            <!--<groupId>org.t-io</groupId>-->
+            <!--<artifactId>tio-utils</artifactId>-->
+            <!--<version>3.2.2.v20181122-RELEASE</version>-->
+        <!--</dependency>-->
+
+        <dependency>
+            <groupId>org.t-io</groupId>
+            <artifactId>tio-http-server</artifactId>
             <version>3.2.2.v20181122-RELEASE</version>
         </dependency>
 
@@ -97,6 +109,7 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 
