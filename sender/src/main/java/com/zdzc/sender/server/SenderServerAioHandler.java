@@ -8,7 +8,7 @@ import com.zdzc.common.Enum.ProtocolType;
 import com.zdzc.common.coder.MsgDecoder;
 import com.zdzc.common.packet.Header;
 import com.zdzc.common.packet.Message;
-import rabbitmq.MqSender;
+import com.zdzc.rabbitmq.MqSender;
 import com.zdzc.sender.util.Command;
 import com.zdzc.common.utils.CommonUtil;
 import com.zdzc.common.utils.DateUtil;
@@ -23,7 +23,7 @@ import org.tio.core.Tio;
 import org.tio.core.exception.AioDecodeException;
 import org.tio.core.intf.Packet;
 import org.tio.server.intf.ServerAioHandler;
-import rabbitmq.MqInitializer;
+import com.zdzc.rabbitmq.MqInitializer;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;

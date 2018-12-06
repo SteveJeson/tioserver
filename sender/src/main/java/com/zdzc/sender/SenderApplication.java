@@ -4,7 +4,7 @@ import com.zdzc.sender.server.ServerStarter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tio.utils.jfinal.P;
-import rabbitmq.MqInitializer;
+import com.zdzc.rabbitmq.MqInitializer;
 
 import java.io.IOException;
 

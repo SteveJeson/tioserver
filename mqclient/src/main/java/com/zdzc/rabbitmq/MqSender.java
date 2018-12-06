@@ -1,4 +1,4 @@
-package rabbitmq;
+package com.zdzc.rabbitmq;
 
 import ch.qos.logback.core.encoder.ByteArrayUtil;
 import com.rabbitmq.client.Channel;

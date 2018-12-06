@@ -3,7 +3,7 @@ package com.zdzc.httpserver;
 import com.zdzc.httpserver.init.HttpServerInit;
 import com.zdzc.tcpclient.client.TcpClientStarter;
 import org.tio.utils.jfinal.P;
-import rabbitmq.MqInitializer;
+import com.zdzc.rabbitmq.MqInitializer;
 
 public class ServerStarter {
 
